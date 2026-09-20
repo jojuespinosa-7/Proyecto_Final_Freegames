@@ -49,18 +49,35 @@ def floor(value):
     return ((value + 200) // 133) * 133 - 200
 
 
-state = {'player': 0}
+state = {
+    'player': 0,
+    'board': {}
+}
+
 players = [drawx, drawo]
 
 
 def tap(x, y):
-    """Draw X or O in tapped square."""
+    """Draw X or O only if the tapped square is available."""
     x = floor(x)
     y = floor(y)
+
+    # Use the square coordinates as a unique board position.
+    position = (x, y)
+
+    # Ignore the click if the square is already occupied.
+    if position in state['board']:
+        return
+
     player = state['player']
     draw = players[player]
+
+    # Save the move before changing to the next player.
+    state['board'][position] = player
+
     draw(x, y)
     update()
+
     state['player'] = not player
 
 
