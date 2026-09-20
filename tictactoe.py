@@ -22,17 +22,26 @@ def grid():
 
 
 def drawx(x, y):
-    """Draw X player."""
-    line(x, y, x + 133, y + 133)
-    line(x, y + 133, x + 133, y)
+    """Draw X player centered with custom color and width."""
+    color('red')
+    width(8)
+
+    # Keep a margin so the X is centered inside the square.
+    line(x + 20, y + 20, x + 113, y + 113)
+    line(x + 20, y + 113, x + 113, y + 20)
 
 
 def drawo(x, y):
-    """Draw O player."""
+    """Draw O player centered with custom color and width."""
+    color('blue')
+    width(8)
+
+    # Start at the bottom-center of the circle to keep it centered.
     up()
-    goto(x + 67, y + 5)
+    goto(x + 67, y + 20)
+    setheading(0)
     down()
-    circle(62)
+    circle(47)
 
 
 def floor(value):
