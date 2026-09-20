@@ -1,11 +1,11 @@
 """Tic Tac Toe
 
-Exercises
+Modified version for the final project.
 
-1. Give the X and O a different color and width.
-2. What happens when someone taps a taken spot?
-3. How would you detect when someone has won?
-4. How could you create a computer player?
+Features:
+1. Custom size, color, and centering for X and O.
+2. Prevention of moves on occupied squares.
+3. Detection of wins and ties.
 """
 
 from turtle import *
@@ -15,6 +15,9 @@ from freegames import line
 
 def grid():
     """Draw tic-tac-toe grid."""
+    color('black')
+    width(1)
+
     line(-67, 200, -67, -200)
     line(67, 200, 67, -200)
     line(-200, -67, 200, -67)
@@ -51,14 +54,64 @@ def floor(value):
 
 state = {
     'player': 0,
-    'board': {}
+    'board': {},
+    'game_over': False
 }
 
 players = [drawx, drawo]
+symbols = ['X', 'O']
+
+
+def check_winner():
+    """Return the winning player or None if there is no winner."""
+    board = state['board']
+
+    # Possible winning combinations using board coordinates.
+    winning_lines = [
+        # Rows
+        [(-200, 66), (-67, 66), (66, 66)],
+        [(-200, -67), (-67, -67), (66, -67)],
+        [(-200, -200), (-67, -200), (66, -200)],
+
+        # Columns
+        [(-200, 66), (-200, -67), (-200, -200)],
+        [(-67, 66), (-67, -67), (-67, -200)],
+        [(66, 66), (66, -67), (66, -200)],
+
+        # Diagonals
+        [(-200, 66), (-67, -67), (66, -200)],
+        [(66, 66), (-67, -67), (-200, -200)]
+    ]
+
+    for line_positions in winning_lines:
+        if all(position in board for position in line_positions):
+            values = [board[position] for position in line_positions]
+
+            if values[0] == values[1] == values[2]:
+                return values[0]
+
+    return None
+
+
+def show_result(message):
+    """Display the final result on the game window."""
+    up()
+    goto(0, 165)
+    color('green')
+    write(
+        message,
+        align='center',
+        font=('Arial', 22, 'bold')
+    )
+    update()
 
 
 def tap(x, y):
-    """Draw X or O only if the tapped square is available."""
+    """Process a move only if the square is available."""
+    # Ignore clicks after the game has finished.
+    if state['game_over']:
+        return
+
     x = floor(x)
     y = floor(y)
 
@@ -78,13 +131,31 @@ def tap(x, y):
     draw(x, y)
     update()
 
+    # Check whether the current player won.
+    winner = check_winner()
+
+    if winner is not None:
+        state['game_over'] = True
+        show_result(f'{symbols[winner]} wins!')
+        return
+
+    # If all nine squares are occupied and nobody won, it is a tie.
+    if len(state['board']) == 9:
+        state['game_over'] = True
+        show_result('Tie game!')
+        return
+
+    # Change player only if the game continues.
     state['player'] = not player
 
 
 setup(420, 420, 370, 0)
+title('Tic Tac Toe')
 hideturtle()
 tracer(False)
+
 grid()
 update()
+
 onscreenclick(tap)
 done()
