@@ -52,13 +52,21 @@ def floor(value):
     return ((value + 200) // 133) * 133 - 200
 
 
+# Game state:
+# - player stores the current turn: 0 represents X and 1 represents O.
+# - board maps each occupied grid coordinate to the player who selected it.
+# - game_over prevents additional moves after a win or a tie.
 state = {
     'player': 0,
     'board': {},
     'game_over': False
 }
 
+
+# Drawing functions associated with each player.
 players = [drawx, drawo]
+
+# Text labels used to report the winner.
 symbols = ['X', 'O']
 
 
@@ -83,10 +91,14 @@ def check_winner():
         [(66, 66), (-67, -67), (-200, -200)]
     ]
 
+    # Review every possible winning line.
     for line_positions in winning_lines:
+
+        # Continue only if all three positions have already been played.
         if all(position in board for position in line_positions):
             values = [board[position] for position in line_positions]
 
+            # The same player occupying all three positions means a win.
             if values[0] == values[1] == values[2]:
                 return values[0]
 
@@ -98,20 +110,25 @@ def show_result(message):
     up()
     goto(0, 165)
     color('green')
+
     write(
         message,
         align='center',
         font=('Arial', 22, 'bold')
     )
+
     update()
 
 
 def tap(x, y):
     """Process a move only if the square is available."""
+
     # Ignore clicks after the game has finished.
     if state['game_over']:
         return
 
+    # Convert the click coordinates to the lower-left corner
+    # of the corresponding grid square.
     x = floor(x)
     y = floor(y)
 
@@ -128,10 +145,11 @@ def tap(x, y):
     # Save the move before changing to the next player.
     state['board'][position] = player
 
+    # Draw the symbol that corresponds to the current player.
     draw(x, y)
     update()
 
-    # Check whether the current player won.
+    # Check whether the current move created a winning combination.
     winner = check_winner()
 
     if winner is not None:
@@ -139,7 +157,8 @@ def tap(x, y):
         show_result(f'{symbols[winner]} wins!')
         return
 
-    # If all nine squares are occupied and nobody won, it is a tie.
+    # If all nine squares are occupied and nobody won,
+    # the game ends in a tie.
     if len(state['board']) == 9:
         state['game_over'] = True
         show_result('Tie game!')
@@ -149,13 +168,17 @@ def tap(x, y):
     state['player'] = not player
 
 
+# Configure the game window.
 setup(420, 420, 370, 0)
 title('Tic Tac Toe')
+
 hideturtle()
 tracer(False)
 
+# Draw the initial board.
 grid()
 update()
 
+# Register mouse clicks and start the Turtle event loop.
 onscreenclick(tap)
 done()
